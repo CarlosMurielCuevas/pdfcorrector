@@ -1,0 +1,22 @@
+# ─── Backend ───────────────────────────────────────────────
+# Variables de entorno (contienen API keys — NUNCA subir)
+backend/.env
+
+# Entorno virtual de Python
+backend/venv/
+
+# Caché de Python
+backend/**/__pycache__/
+backend/**/*.pyc
+backend/**/*.pyo
+backend/**/*.pyd
+
+# ─── Frontend ──────────────────────────────────────────────
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/cache/
+
+# ─── Sistema ────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.log

@@ -1,0 +1,28 @@
+<nav class="navbar">
+  <div class="navbar__logo">
+    <div class="navbar__logo-icon">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M2 2h10v2H2V2zm0 4h7v2H2V6zm0 4h5v2H2v-2z" fill="white" opacity="0.9"/>
+      </svg>
+    </div>
+    <span>{{ 'NAVBAR.TITLE' | translate }}</span>
+  </div>
+
+  <div class="navbar__actions">
+    <!-- Toggle de idioma ES/EN -->
+    <div class="lang-toggle" role="group" aria-label="Selector de idioma">
+      <button
+        class="lang-toggle__btn"
+        [class.lang-toggle__btn--active]="(langService.currentLang$ | async) === 'es'"
+        (click)="setLang('es')"
+        aria-label="Cambiar a español"
+      >ES</button>
+      <button
+        class="lang-toggle__btn"
+        [class.lang-toggle__btn--active]="(langService.currentLang$ | async) === 'en'"
+        (click)="setLang('en')"
+        aria-label="Switch to English"
+      >EN</button>
+    </div>
+  </div>
+</nav>

@@ -1,0 +1,188 @@
+<div class="home">
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero__badge">
+      <span class="hero__badge-dot"></span>
+      {{ 'HERO.BADGE' | translate }}
+    </div>
+    <h1 class="hero__title">{{ 'HERO.TITLE' | translate }}</h1>
+    <p class="hero__subtitle">{{ 'HERO.SUBTITLE' | translate }}</p>
+  </section>
+
+  <div class="main-content">
+
+    <!-- Zona de subida -->
+    <div
+      class="upload-zone"
+      [class.upload-zone--over]="isDragOver()"
+      [class.upload-zone--selected]="selectedFile()"
+      [@dropZone]="isDragOver() ? 'over' : 'idle'"
+      (dragover)="onDragOver($event)"
+      (dragleave)="onDragLeave()"
+      (drop)="onFileDrop($event)"
+    >
+      <div class="upload-zone__icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="1.5">
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="12" y1="18" x2="12" y2="12"/>
+          <polyline points="9 15 12 12 15 15"/>
+        </svg>
+      </div>
+
+      @if (selectedFile()) {
+        <p class="upload-zone__filename">{{ selectedFile()!.name }}</p>
+        <p class="upload-zone__filesize">
+          {{ (selectedFile()!.size / 1024 / 1024).toFixed(2) }} MB
+        </p>
+        <button class="upload-zone__change-btn" (click)="fileInput.click()">
+          Cambiar archivo
+        </button>
+      } @else {
+        <p class="upload-zone__title">{{ 'UPLOAD.DRAG_TITLE' | translate }}</p>
+        <p class="upload-zone__subtitle">{{ 'UPLOAD.DRAG_SUBTITLE' | translate }}</p>
+        <button class="upload-zone__btn" (click)="fileInput.click()">
+          {{ 'UPLOAD.SELECT_BUTTON' | translate }}
+        </button>
+      }
+
+      <!-- Input oculto -->
+      <input
+        #fileInput
+        type="file"
+        accept=".pdf"
+        style="display: none"
+        (change)="onFileSelected($event)"
+      />
+    </div>
+
+    <!-- Error de validación -->
+    @if (errorMessage()) {
+      <p class="error-msg" [@slideUp]>
+        ⚠ {{ errorMessage() | translate }}
+      </p>
+    }
+
+    <!-- Contexto + botón de corrección -->
+    <div class="context-row">
+      <input
+        class="context-input"
+        type="text"
+        [placeholder]="'UPLOAD.CONTEXT_PLACEHOLDER' | translate"
+        [(ngModel)]="context"
+      />
+      <button
+        class="correct-btn"
+        [disabled]="!selectedFile() || state() === 'processing'"
+        (click)="correctPdf()"
+      >
+        @if (state() === 'processing') {
+          <span class="correct-btn__spinner"></span>
+        }
+        {{ 'UPLOAD.CORRECT_BUTTON' | translate }}
+      </button>
+    </div>
+
+    <!-- Panel de procesamiento -->
+    @if (state() === 'processing') {
+      <div class="processing-panel" [@slideUp]>
+        <div class="processing-panel__spinner"></div>
+        <p class="processing-panel__text">{{ currentStep() | translate }}</p>
+        <div class="processing-panel__bar">
+          <div class="processing-panel__bar-fill"></div>
+        </div>
+      </div>
+    }
+
+    <!-- Resultados -->
+    @if (state() === 'done' && result()) {
+      <section class="results" [@slideUp]>
+        <div class="results__header">
+          <span class="results__label">{{ 'RESULTS.TITLE' | translate }}</span>
+          <span class="results__demo-tag">
+            {{ result()!.stats.processing_time_seconds }}s
+          </span>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-card__value stat-card__value--purple">
+              {{ result()!.stats.total_changes }}
+            </span>
+            <span class="stat-card__label">
+              {{ 'RESULTS.STATS.CORRECTIONS' | translate }}
+            </span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-card__value stat-card__value--blue">
+              {{ pagesCount() }}
+            </span>
+            <span class="stat-card__label">
+              {{ 'RESULTS.STATS.PAGES' | translate }}
+            </span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-card__value">
+              {{ result()!.stats.processing_time_seconds }}s
+            </span>
+            <span class="stat-card__label">
+              {{ 'RESULTS.STATS.TIME' | translate }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Diff visual -->
+        <div class="diff-grid">
+          <div class="diff-panel">
+            <div class="diff-panel__header">
+              <span class="diff-panel__label">{{ 'RESULTS.ORIGINAL' | translate }}</span>
+              <span class="diff-panel__tag diff-panel__tag--before">
+                {{ 'RESULTS.BEFORE' | translate }}
+              </span>
+            </div>
+            <div class="diff-panel__content">
+              @for (block of changedBlocks().slice(0, 8); track block.block_index) {
+                <p class="diff-panel__block">
+                  <span class="diff-panel__del">{{ block.original_text }}</span>
+                </p>
+              }
+            </div>
+          </div>
+
+          <div class="diff-panel">
+            <div class="diff-panel__header">
+              <span class="diff-panel__label">{{ 'RESULTS.CORRECTED' | translate }}</span>
+              <span class="diff-panel__tag diff-panel__tag--after">
+                {{ 'RESULTS.AFTER' | translate }}
+              </span>
+            </div>
+            <div class="diff-panel__content">
+              @for (block of changedBlocks().slice(0, 8); track block.block_index) {
+                <p class="diff-panel__block">
+                  <span class="diff-panel__ins">{{ block.corrected_text }}</span>
+                </p>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="results__actions">
+          <button class="download-btn" (click)="downloadPdf()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            {{ 'RESULTS.DOWNLOAD_BUTTON' | translate }}
+          </button>
+          <button class="reset-btn" (click)="reset()">Nuevo documento</button>
+        </div>
+      </section>
+    }
+
+  </div>
+</div>

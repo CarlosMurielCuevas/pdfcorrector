@@ -1,0 +1,43 @@
+{
+  "NAVBAR": {
+    "TITLE": "PDFCorrector"
+  },
+  "HERO": {
+    "BADGE": "AI · OpenRouter · Gemini 2.0 Flash",
+    "TITLE": "Fix and improve your PDF documents",
+    "SUBTITLE": "Spelling, style and structure improved automatically. Download your PDF with the original layout intact."
+  },
+  "UPLOAD": {
+    "DRAG_TITLE": "Drop your PDF here",
+    "DRAG_SUBTITLE": "or click to select · PDF up to 20 MB",
+    "SELECT_BUTTON": "Select file",
+    "FILE_SELECTED": "File selected",
+    "CONTEXT_PLACEHOLDER": "Document context (e.g.: it's a CV, legal contract, thesis...)",
+    "CORRECT_BUTTON": "Correct PDF"
+  },
+  "PROCESSING": {
+    "STEP_1": "Extracting text from PDF...",
+    "STEP_2": "Analysing structure...",
+    "STEP_3": "Calling Gemini 2.0 Flash...",
+    "STEP_4": "Applying corrections...",
+    "STEP_5": "Rebuilding the PDF..."
+  },
+  "RESULTS": {
+    "TITLE": "Results",
+    "ORIGINAL": "Original",
+    "CORRECTED": "Corrected",
+    "BEFORE": "before",
+    "AFTER": "after",
+    "STATS": {
+      "CORRECTIONS": "corrections",
+      "PAGES": "pages",
+      "TIME": "processed in"
+    },
+    "DOWNLOAD_BUTTON": "Download corrected PDF"
+  },
+  "ERRORS": {
+    "FILE_TYPE": "Only PDF files are accepted.",
+    "FILE_SIZE": "File exceeds the 20 MB limit.",
+    "GENERIC": "Error processing the PDF. Please try again."
+  }
+}

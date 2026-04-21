@@ -62,8 +62,12 @@ def extract_text_blocks(pdf_bytes: bytes) -> list[TextBlock]:
                     continue
 
                 page_chars = page.chars or []
-                # Solo rectángulos rellenos (fondos de color)
                 page_rects = [r for r in (page.rects or []) if r.get("fill")]
+                # Líneas de subrayado: líneas horizontales delgadas
+                page_lines = [
+                    l for l in (page.lines or [])
+                    if abs(l.get("y0", 0) - l.get("y1", 0)) < 2
+                ]
 
                 current_block_words = []
                 current_y = None
@@ -79,7 +83,7 @@ def extract_text_blocks(pdf_bytes: bytes) -> list[TextBlock]:
                         if current_block_words:
                             block = _words_to_block(
                                 current_block_words, page_num, block_counter,
-                                page_chars, page_rects
+                                page_chars, page_rects, page_lines
                             )
                             blocks.append(block)
                             block_counter += 1
@@ -89,7 +93,7 @@ def extract_text_blocks(pdf_bytes: bytes) -> list[TextBlock]:
                 if current_block_words:
                     block = _words_to_block(
                         current_block_words, page_num, block_counter,
-                        page_chars, page_rects
+                        page_chars, page_rects, page_lines
                     )
                     blocks.append(block)
                     block_counter += 1
@@ -136,6 +140,7 @@ def _words_to_block(
     index: int,
     page_chars: list[dict],
     page_rects: list[dict],
+    page_lines: list[dict] = [],
 ) -> TextBlock:
     """Convierte una lista de palabras en un TextBlock con bbox, fuente, color y flags."""
     text = " ".join(w["text"] for w in words)
@@ -212,6 +217,15 @@ def _words_to_block(
         for w in words
     ]
 
+    # Detectamos subrayados: líneas horizontales que caen justo debajo del bloque
+    underlines = [
+        {"x0": l["x0"], "y": l["y0"], "x1": l["x1"], "width": l.get("linewidth", 1),
+         "color": _normalize_color(l.get("non_stroking_color") or l.get("stroking_color"))}
+        for l in page_lines
+        if l.get("x0", 0) >= x0 - 5 and l.get("x1", 0) <= x1 + 5
+        and y0 - 5 <= l.get("y0", 0) <= y1 + 8
+    ]
+
     return TextBlock(
         page=page,
         block_index=index,
@@ -223,4 +237,5 @@ def _words_to_block(
         bg_color=bg_color,
         skip_correction=skip_correction,
         word_data=word_data,
+        underlines=underlines if underlines else None,
     )

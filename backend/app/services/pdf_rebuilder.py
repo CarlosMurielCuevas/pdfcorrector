@@ -113,15 +113,24 @@ def _create_word_overlay(
         # Texto completo corregido con el color y fuente originales
         fg = block.font_color or [0.0, 0.0, 0.0]
         c.setFillColorRGB(*fg)
+        c.setFont(rl_font, font_size)
 
         text_width = c.stringWidth(block.corrected_text, rl_font, font_size)
-        horiz_scale = (block_width / text_width * 100) if text_width > block_width and text_width > 0 else 100
+        c.saveState()
+        if text_width > block_width and text_width > 0:
+            scale_x = block_width / text_width
+            c.transform(scale_x, 0, 0, 1, x0 * (1 - scale_x), 0)
+        c.drawString(x0, y_rl + 2, block.corrected_text)
+        c.restoreState()
 
-        text_obj = c.beginText(x0, y_rl + 2)
-        text_obj.setFont(rl_font, font_size)
-        text_obj.setHorizScale(horiz_scale)
-        text_obj.textLine(block.corrected_text)
-        c.drawText(text_obj)
+        # Redibujar subrayados que el rectángulo de fondo tapó
+        if block.underlines:
+            for ul in block.underlines:
+                ul_y = page_height - ul["y"]
+                stroke_color = ul.get("color") or fg
+                c.setStrokeColorRGB(*stroke_color)
+                c.setLineWidth(ul.get("width") or 0.5)
+                c.line(ul["x0"], ul_y, ul["x1"], ul_y)
 
     c.save()
     overlay_buffer.seek(0)

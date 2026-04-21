@@ -16,6 +16,7 @@ class TextBlock(BaseModel):
     bg_color: Optional[list[float]] = Field(None, description="Color de fondo RGB [r,g,b] en rango 0-1")
     skip_correction: bool = Field(False, description="Si es True, no se envía a la IA (iconos, símbolos, etc.)")
     word_data: Optional[list[dict]] = Field(None, exclude=True, description="Posiciones de palabras - no se serializa")
+    underlines: Optional[list[dict]] = Field(None, exclude=True, description="Líneas de subrayado del bloque - no se serializa")
 
 
 class CorrectionStats(BaseModel):

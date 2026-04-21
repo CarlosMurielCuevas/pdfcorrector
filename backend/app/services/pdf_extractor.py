@@ -163,11 +163,17 @@ def _words_to_block(
         and c.get("text", "").strip()
     ]
 
+    font_name = None
     if block_chars:
         # Detectamos fuentes de iconos/símbolos
         fontnames = [c.get("fontname", "") for c in block_chars]
         if any(_is_symbol_font(fn) for fn in fontnames):
             skip_correction = True
+
+        # Nombre de fuente más frecuente
+        valid_fontnames = [fn for fn in fontnames if fn]
+        if valid_fontnames:
+            font_name = max(set(valid_fontnames), key=valid_fontnames.count)
 
         # Tamaño de fuente más frecuente
         sizes = [c["size"] for c in block_chars if c.get("size")]
@@ -201,13 +207,20 @@ def _words_to_block(
 
     bg_color = best_bg
 
+    word_data = [
+        {"text": w["text"], "x0": w["x0"], "top": w["top"], "x1": w["x1"], "bottom": w["bottom"]}
+        for w in words
+    ]
+
     return TextBlock(
         page=page,
         block_index=index,
         original_text=text,
         bbox=[x0, y0, x1, y1],
         font_size=font_size,
+        font_name=font_name,
         font_color=font_color,
         bg_color=bg_color,
         skip_correction=skip_correction,
+        word_data=word_data,
     )

@@ -79,57 +79,42 @@ def _create_word_overlay(
     blocks: list[TextBlock], page_width: float, page_height: float
 ) -> BytesIO:
     """
-    Crea una capa que solo cubre y reescribe las palabras concretas que cambiaron,
-    manteniendo la fuente, tamaño y color del original.
+    Cubre y reescribe el bloque completo de cada línea que tiene cambios,
+    manteniendo fuente, tamaño y color originales.
     """
     overlay_buffer = BytesIO()
     c = canvas.Canvas(overlay_buffer, pagesize=(page_width, page_height))
 
     for block in blocks:
-        if not block.corrected_text or not block.word_data:
+        if not block.corrected_text or not block.bbox:
             continue
 
-        orig_words = block.original_text.split()
-        corr_words = block.corrected_text.split()
-        word_positions = block.word_data
+        x0, y0_pdf, x1, y1_pdf = block.bbox
+        block_width = x1 - x0
+        block_height = y1_pdf - y0_pdf
+        y_rl = page_height - y1_pdf
 
         rl_font = _get_reportlab_font(block.font_name)
-        font_size = block.font_size or 10
+        font_size = block.font_size or max(6, min(round(block_height * 0.85), 14))
 
-        for i, (orig_w, corr_w) in enumerate(zip(orig_words, corr_words)):
-            if orig_w == corr_w:
-                continue
-            if i >= len(word_positions):
-                continue
+        # Rectángulo de fondo del mismo color que el original
+        bg = block.bg_color or [1.0, 1.0, 1.0]
+        c.setFillColorRGB(*bg)
+        padding = 1
+        c.rect(
+            x0 - padding,
+            y_rl - padding,
+            block_width + padding * 2,
+            block_height + padding * 2,
+            fill=1,
+            stroke=0,
+        )
 
-            wp = word_positions[i]
-            x0_w = wp["x0"]
-            y0_w = wp["top"]
-            x1_w = wp["x1"]
-            y1_w = wp["bottom"]
-
-            word_width = x1_w - x0_w
-            word_height = y1_w - y0_w
-            y_rl = page_height - y1_w
-
-            # Fondo del mismo color que el original
-            bg = block.bg_color or [1.0, 1.0, 1.0]
-            c.setFillColorRGB(*bg)
-            padding = 1
-            c.rect(
-                x0_w - padding,
-                y_rl - padding,
-                word_width + padding * 2,
-                word_height + padding * 2,
-                fill=1,
-                stroke=0,
-            )
-
-            # Texto corregido con el color y fuente originales
-            fg = block.font_color or [0.0, 0.0, 0.0]
-            c.setFillColorRGB(*fg)
-            c.setFont(rl_font, font_size)
-            c.drawString(x0_w, y_rl + 2, corr_w)
+        # Texto completo corregido con el color y fuente originales
+        fg = block.font_color or [0.0, 0.0, 0.0]
+        c.setFillColorRGB(*fg)
+        c.setFont(rl_font, font_size)
+        c.drawString(x0, y_rl + 2, block.corrected_text)
 
     c.save()
     overlay_buffer.seek(0)

@@ -114,7 +114,16 @@ def _create_word_overlay(
         fg = block.font_color or [0.0, 0.0, 0.0]
         c.setFillColorRGB(*fg)
         c.setFont(rl_font, font_size)
+
+        # Si el texto corregido es más ancho que el bloque original, lo comprimimos
+        text_width = c.stringWidth(block.corrected_text, rl_font, font_size)
+        if text_width > block_width and text_width > 0:
+            c.setHorizScale((block_width / text_width) * 100)
+        else:
+            c.setHorizScale(100)
+
         c.drawString(x0, y_rl + 2, block.corrected_text)
+        c.setHorizScale(100)
 
     c.save()
     overlay_buffer.seek(0)

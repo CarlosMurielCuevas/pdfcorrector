@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
@@ -156,5 +156,25 @@ export class HomeComponent {
     this.context.set('');
     this.result.set(null);
     this.errorMessage.set('');
+  }
+
+  /** Devuelve tokens del original marcando solo las palabras que cambiaron */
+  getOriginalTokens(original: string, corrected: string): { text: string; changed: boolean }[] {
+    const origTokens = original.split(/(\s+)/);
+    const corrTokens = corrected.split(/(\s+)/);
+    return origTokens.map((token, i) => ({
+      text: token,
+      changed: !token.match(/^\s+$/) && token !== (corrTokens[i] ?? ''),
+    }));
+  }
+
+  /** Devuelve tokens del corregido marcando solo las palabras que cambiaron */
+  getCorrectedTokens(original: string, corrected: string): { text: string; changed: boolean }[] {
+    const origTokens = original.split(/(\s+)/);
+    const corrTokens = corrected.split(/(\s+)/);
+    return corrTokens.map((token, i) => ({
+      text: token,
+      changed: !token.match(/^\s+$/) && token !== (origTokens[i] ?? ''),
+    }));
   }
 }

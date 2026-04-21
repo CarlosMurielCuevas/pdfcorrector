@@ -145,7 +145,9 @@
             <div class="diff-panel__content">
               @for (block of changedBlocks().slice(0, 8); track block.block_index) {
                 <p class="diff-panel__block">
-                  <span class="diff-panel__del">{{ block.original_text }}</span>
+                  @for (token of getOriginalTokens(block.original_text, block.corrected_text!); track $index) {
+                    <span [class.diff-panel__del]="token.changed">{{ token.text }}</span>
+                  }
                 </p>
               }
             </div>
@@ -161,7 +163,9 @@
             <div class="diff-panel__content">
               @for (block of changedBlocks().slice(0, 8); track block.block_index) {
                 <p class="diff-panel__block">
-                  <span class="diff-panel__ins">{{ block.corrected_text }}</span>
+                  @for (token of getCorrectedTokens(block.original_text, block.corrected_text!); track $index) {
+                    <span [class.diff-panel__ins]="token.changed">{{ token.text }}</span>
+                  }
                 </p>
               }
             </div>

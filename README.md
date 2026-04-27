@@ -123,8 +123,22 @@ Respuesta:
   pdf_base64   → PDF corregido codificado en base64
 ```
 
-## Notas
+## 🚧 Limitaciones conocidas
 
-- PDFs escaneados (solo imágenes) no son compatibles, se necesita texto seleccionable
+- PDFs con texto en **negrita o cursiva** pueden perder el formato tras la corrección
+- PDFs con **texto sobre imágenes** o fondos complejos pueden tener desajustes visuales
+- No compatible con PDFs **escaneados** (solo imágenes sin texto seleccionable)
+- Documentos con **tablas complejas** pueden reconstruirse con pequeñas diferencias
 - La IA no modifica mayúsculas, URLs, emails, nombres propios, tecnologías ni iconos
 - El modelo Groq gratuito tiene un límite de ~14.400 peticiones/día
+
+## 🔜 Próximas mejoras
+
+- [ ] Soporte para negritas y cursivas en la reconstrucción del PDF
+- [ ] Mejora en el manejo de tablas y columnas
+- [ ] Soporte para PDFs con múltiples idiomas
+- [ ] Historial de correcciones
+
+## 📄 Licencia
+
+Este proyecto es de uso personal y educativo. No está permitido su uso comercial sin autorización del autor.
